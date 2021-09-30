@@ -63,7 +63,7 @@ public class HomeController {
   	public String selectoneBBS(@PathVariable("bbs_id") int bbs_id, Model model) {
   		System.out.println("bbs_id ["+bbs_id+"]"); 
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
-  		Listinfo post=bbs.getPost(bbs_id);//아이디로 호출
+  		Listinfo post=bbs.getPost(bbs_id);//제이쿼리(list)로 받은 아이디로 호출...
   		model.addAttribute("post",post);
   		return "view"; 
   	}

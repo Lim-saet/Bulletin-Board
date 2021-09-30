@@ -8,6 +8,9 @@
 <title>게시물 목록보기</title>
 </head>
 <style>
+table {
+	border: 1px solid;
+}
 
 </style>
 <body>
