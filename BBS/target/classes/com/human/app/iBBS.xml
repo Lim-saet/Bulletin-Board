@@ -4,9 +4,26 @@
 	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 	
 <mapper namespace="com.human.app.iBBS">
-		<insert id='writebbs'>
+		<insert id="writebbs">
 			insert into bbs(bbs_id,title,content,writer,passcode,created,updated)
 			values(seq_bbs_id.nextval,#{param1},#{param2},#{param3},#{param4},
 			to_char(sysdate,'YYYYMMDDHH24MI'),to_char(sysdate,'YYYYMMDDHH24MI'))
 		</insert>
+	  <select id="getList" resultType="com.human.app.Listinfo">
+			select bbs_id, title, content, writer, created, updated
+			from bbs
+			order by created desc
+		</select> 
+		<update id="updatebbs">
+			update bbs set title=#{param2},content=#{param3}
+			where bbs_id=#{param1}
+		</update>
+		<delete id="deletebbs">
+			delete from bbs where bbs_id={#param1}
+		</delete>
+		<select id="getPost" resultType="com.human.app.Listinfo">
+			select bbs_id,title,content,writer,created,updated
+			from bbs
+			where bbs_id=#{param1}
+		</select>
 		</mapper>

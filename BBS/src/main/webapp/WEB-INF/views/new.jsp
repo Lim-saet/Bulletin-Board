@@ -16,7 +16,8 @@
 <tr><td>작성자</td><td><input type=text name=writer></td></tr>
 <tr><td>비밀번호</td><td><input type=password name=passcode></td></tr>
 <tr><td colspan=2><input type=submit valur='글등록'>&nbsp; 
-		<input type=button value='취소(목록보기)'>
+		<input type=button value='취소(목록보기)' OnClick="javascript:history.back(-1)">
+		<!-- OnClick="javascript:history.back(-1)": 바로 전페이지로이동 -->
 </table>
 </form>
 </body>

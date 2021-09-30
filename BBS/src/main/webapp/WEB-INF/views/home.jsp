@@ -7,9 +7,9 @@
 </head>
 <body>
 <h1>
-	Hello world!  
+	게시판  
 </h1>
 
-<P>  The time on the server is ${serverTime}. </P>
+<P>  게시판 목록보기  </P>
 </body>
 </html>
