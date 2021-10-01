@@ -19,7 +19,7 @@
 			where bbs_id=#{param1}
 		</update>
 		<delete id="deletebbs">
-			delete from bbs where bbs_id={#param1}
+			delete from bbs where bbs_id=#{param1}
 		</delete>
 		<select id="getPost" resultType="com.human.app.Listinfo">
 			select bbs_id,title,content,writer,created,updated

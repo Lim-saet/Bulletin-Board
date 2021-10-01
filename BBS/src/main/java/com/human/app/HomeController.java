@@ -87,23 +87,47 @@ public class HomeController {
 		
 		return "redirect:/list";
 	}
+	@RequestMapping(value = "/update/view/{bbs_id}", method = RequestMethod.GET)
+	public String upviewBBS(@PathVariable("bbs_id") int bbs_id, Model model) {
+		iBBS bbs=sqlSession.getMapper(iBBS.class);
+  		Listinfo post=bbs.getPost(bbs_id);//제이쿼리(list)로 받은 아이디로 호출...
+  		model.addAttribute("update",post);
+		return "update";
+	}
 	@RequestMapping(value = "/update", method = RequestMethod.POST,
 			produces = "application/text; charset=utf8")
-	//@ResponseBody
-	public String updateBBS(HttpServletRequest hsr) {
+	public String updateBBS(HttpServletRequest hsr
+			) {
+		//몇번게시글을 업데이트 할것인지 추가
+		//mybatis 호출 
+		//-> 받아온 데이터를 update.jsp에 전달 
+		
+		int uBbsid= Integer.parseInt(hsr.getParameter("bbs_id"));
+		String uTitle = hsr.getParameter("title");
+		String uContent = hsr.getParameter("content");
+		//System.out.println("content ["+uContent+"]");
 		iBBS bbs= sqlSession.getMapper(iBBS.class);
-		int bbs_id= Integer.parseInt(hsr.getParameter("bbs_id"));
-		String content=hsr.getParameter("content");
-		String title= hsr.getParameter("title");
-		bbs.updatebbs(bbs_id,content,title);
+		//System.out.println("title ["+uTitle+"] content ["+uContent+"] bbs_id ["+uBbsid+"]");
+		bbs.updatebbs(uBbsid,uTitle, uContent);
+		
+//		
+//		String content=hsr.getParameter("content");
+//		String title= hsr.getParameter("title");
+//		bbs.updatebbs(bbsid,content,title);
 		return "redirect:/list";
 	}
-	@RequestMapping(value = "/delete", method = RequestMethod.POST,
+	
+	
+	@RequestMapping(value = "/delete/{bbs_id}", method = RequestMethod.GET,
 			produces = "application/text; charset=utf8")
-	public String deleteBBS(HttpServletRequest hsr) {
-		int bbsid=Integer.parseInt(hsr.getParameter("bbs_id"));
+	public String deleteBBS(@PathVariable("bbs_id") int bbs_id, Model model
+			) {
+		System.out.println("bbs_id**["+bbs_id+"]");//출력완료
+		model.addAttribute("bbsid",bbs_id);
+		//int bbsid=Integer.parseInt(hsr.getParameter("bbs_id"));
 		iBBS bbs=sqlSession.getMapper(iBBS.class);
-		bbs.deletebbs(bbsid);
+		bbs.deletebbs(bbs_id);
+		System.out.println("삭제완료");
 		return "redirect:/list";
 	}
 }	
