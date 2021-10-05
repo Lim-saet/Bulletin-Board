@@ -15,10 +15,18 @@
 
 <tr><td>작성자</td><td><input type=text name=writer></td></tr>
 <tr><td>비밀번호</td><td><input type=password name=passcode></td></tr>
-<tr><td colspan=2><input type=submit valur='글등록'>&nbsp; 
-		<input type=button value='취소(목록보기)' OnClick="javascript:history.back(-1)">
+<tr><td colspan=2><input type=submit value='글등록'>&nbsp; 
+		<input type=button value='취소(목록보기)' id=btnlist >
 		<!-- OnClick="javascript:history.back(-1)": 바로 전페이지로이동 -->
 </table>
 </form>
 </body>
+<script src='http://code.jquery.com/jQuery-3.5.0.js'></script>
+<script>
+$(document)
+	.on('click','#btnlist',function(){
+		document.location='/app/list';
+		return false;
+	}) 
+</script>
 </html>

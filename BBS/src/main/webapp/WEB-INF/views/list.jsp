@@ -8,13 +8,36 @@
 <title>게시물 목록보기</title>
 </head>
 <style>
-table {
-	border: 1px solid;
+table{
+	border: 1px solid black;
+	border-collapse: collapse;
+	margin-left:auto; 
+    margin-right:auto;
 }
-
+table,tr,td{
+ 	border:1px solid black;
+}
+td:hover {
+	cursor: pointer;
+}
+th{
+	border:1px solid black;
+}
+th:hover {
+	cursor: default; 
+}
+thead{
+	 pointer-events : none;
+}
+input[type=button] {
+	margin: auto;
+	display:block;
+}
 </style>
 <body>
- <table algin=center valign=top>
+<div class='content'>
+<table id=tbllist>
+
   	<thead>
   		<tr><th>게시물번호<th>제목</th><th>작성자</th><th>작성시각</th><th>수정시각</th></tr>
   	</thead>
@@ -24,6 +47,9 @@ table {
     	</tr>
     </c:forEach>
 </table>
+<input type=button value='새글쓰기' id=btnNew>
+<!--  onClick="location.href='new'" -->
+</div>
 </body>
 <script src='http://code.jquery.com/jQuery-3.5.0.js'></script>
 <script>
@@ -34,5 +60,9 @@ $(document)
 		document.location="/app/view/"+bbs_id;
 		return false;
 	})
+ 	.on('click','#btnNew',function(){
+		document.location='/app/new';
+		return false;
+	}) 
 </script>
 </html>
