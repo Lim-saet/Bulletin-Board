@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.apache.ibatis.session.SqlSession;
 import org.slf4j.Logger;
@@ -55,9 +56,27 @@ public class HomeController {
   		System.out.println(alBBS.size());
   		model.addAttribute("listBBS",alBBS);
   		
-  		return "list"; 
+  		HttpSession session=hsr.getSession();
+  		String userid=(String) session.getAttribute("userid");
+  		System.out.println("userid ["+userid+"]");
+  		if(userid==null || userid.equals("")) {
+  			return "redirect:/login"; 
+  		} else {
+  			return "list";
+  		}
   	}
-	
+	 @RequestMapping("/login")
+	   public String login() {
+	      return "login";
+	   }
+	@RequestMapping(value = "/check_user", method = RequestMethod.POST,
+			produces = "application/text; charset=utf8")
+		public String check_user(HttpServletRequest hsr,Model model) {
+			String userid=hsr.getParameter("userid");
+			String pw=hsr.getParameter("pw");
+			
+		return "redirect:/list";
+	}
 	 
   	@RequestMapping(value = "/view/{bbs_id}", method = RequestMethod.GET) 
   	public String selectoneBBS(@PathVariable("bbs_id") int bbs_id, Model model) {

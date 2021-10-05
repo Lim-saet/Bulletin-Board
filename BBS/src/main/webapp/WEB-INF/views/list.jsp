@@ -36,8 +36,9 @@ input[type=button] {
 </style>
 <body>
 <div class='content'>
+
 <table id=tbllist>
-	<tr><td align=right><input type=button value=로그인></td></tr>
+	
   	<thead>
   		<tr><th>게시물번호<th>제목</th><th>작성자</th><th>작성시각</th><th>수정시각</th></tr>
   	</thead>
@@ -47,7 +48,8 @@ input[type=button] {
     	</tr>
     </c:forEach>
 </table>
-<input type=button value='새글쓰기' id=btnNew>
+<!--<input type=button value='새글쓰기' id=btnNew>-->
+<input type=button value='로그인 'id=btnLogin> <!-- 로그인 누르면 리스트 창으로 가도록? -->
 <!--  onClick="location.href='new'" -->
 </div>
 </body>
