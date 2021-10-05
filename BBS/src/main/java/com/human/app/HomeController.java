@@ -48,7 +48,7 @@ public class HomeController {
 	
 	@RequestMapping(value = "/list", method = RequestMethod.GET,
 			produces = "application/text; charset=utf8") 
-  	public String selectBBS(Model model) { 
+  	public String selectBBS(HttpServletRequest hsr,Model model) { 
 		//MyBatis 호출해서 가져오기 
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		ArrayList<Listinfo> alBBS=bbs.getList();
