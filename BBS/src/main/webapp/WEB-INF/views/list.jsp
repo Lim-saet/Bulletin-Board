@@ -48,8 +48,13 @@ input[type=button] {
     	</tr>
     </c:forEach>
 </table>
-<!--<input type=button value='새글쓰기' id=btnNew>-->
-<input type=button value='로그인 'id=btnLogin> <!-- 로그인 누르면 리스트 창으로 가도록? -->
+<c:if test="${loggined eq '1'}">
+	${userid}&nbsp;<a href="/app/logout">로그아웃</a>
+	<input type=button value='새글쓰기' id=btnNew>
+</c:if>
+<c:if test="${loggined eq '0'}">
+	<input type=button value='로그인 'id=btnLogin>  
+</c:if>
 <!--  onClick="location.href='new'" -->
 </div>
 </body>
@@ -66,5 +71,9 @@ $(document)
 		document.location='/app/new';
 		return false;
 	}) 
+	.on('click','#btnLogin',function(){
+		document.location='/app/login';
+		return false;
+	})
 </script>
 </html>

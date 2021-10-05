@@ -15,6 +15,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 
 /**
  * Handles requests for the application home page.
@@ -54,30 +55,54 @@ public class HomeController {
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		ArrayList<Listinfo> alBBS=bbs.getList();
   		System.out.println(alBBS.size());
-  		model.addAttribute("listBBS",alBBS);
-  		
+
   		HttpSession session=hsr.getSession();
-  		String userid=(String) session.getAttribute("userid");
+  		String userid=(String) session.getAttribute("loginid");
   		System.out.println("userid ["+userid+"]");
+  		
   		if(userid==null || userid.equals("")) {
-  			return "redirect:/login"; 
+  			model.addAttribute("loggined","0");
   		} else {
-  			return "list";
+  			model.addAttribute("loggined","1");
+  			model.addAttribute("userid",userid);
   		}
+  		model.addAttribute("listBBS",alBBS);
+  		return "list";
   	}
+	
+	@RequestMapping("/logout")
+	   public String logout(HttpServletRequest hsr) {
+		  HttpSession session=hsr.getSession();
+		  session.invalidate();
+	      return "redirect:/list";
+	   }
 	 @RequestMapping("/login")
 	   public String login() {
 	      return "login";
+	   }
+	 @RequestMapping("/newPerson")
+	   public String newPerson() {
+	      return "newPerson";
 	   }
 	@RequestMapping(value = "/check_user", method = RequestMethod.POST,
 			produces = "application/text; charset=utf8")
 		public String check_user(HttpServletRequest hsr,Model model) {
 			String userid=hsr.getParameter("userid");
+			System.out.println("id ["+userid+"]");
 			String pw=hsr.getParameter("pw");
-			
-		return "redirect:/list";
+			System.out.println("pw ["+pw+"]");
+			//DB에서 유저확인: 기존유저면 리스트(새글쓰기 나오게) 없는 유저면 login창 그대로 
+			iMember member=sqlSession.getMapper(iMember.class);
+				int n = member.doCheckuser(userid,pw);
+				if(n==1) {
+					HttpSession session=hsr.getSession();
+					session.setAttribute("loginid", userid);
+					return "redirect:/list";
+				} else {
+					return "redirect:/login";
+				}
 	}
-	 
+	
   	@RequestMapping(value = "/view/{bbs_id}", method = RequestMethod.GET) 
   	public String selectoneBBS(@PathVariable("bbs_id") int bbs_id, Model model) {
   		System.out.println("bbs_id ["+bbs_id+"]"); 
@@ -148,5 +173,17 @@ public class HomeController {
 		bbs.deletebbs(bbs_id);
 		System.out.println("삭제완료");
 		return "redirect:/list";
+	}
+	
+	@RequestMapping(value="/signin",method=RequestMethod.POST,
+			produces = "application/text; charset=utf8")	
+	public String signin(HttpServletRequest hsr) {
+		String realname=hsr.getParameter("realname");
+		String loginid=hsr.getParameter("loginid");
+		String password=hsr.getParameter("password");
+		//MyBatis를 이용해서 회원추가(member table)
+		iMember member=sqlSession.getMapper(iMember.class);
+		member.doSignin(realname, loginid, password);
+		return "login";
 	}
 }	
