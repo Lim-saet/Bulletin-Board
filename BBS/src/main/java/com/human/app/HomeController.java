@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 /**
  * Handles requests for the application home page.
@@ -54,15 +55,15 @@ public class HomeController {
 		//MyBatis 호출해서 가져오기 
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		ArrayList<Listinfo> alBBS=bbs.getList();
-  		System.out.println(alBBS.size());
-
+  		//System.out.println(alBBS.size());
+  		
   		HttpSession session=hsr.getSession();
   		String userid=(String) session.getAttribute("loginid");
   		System.out.println("userid ["+userid+"]");
   		
   		if(userid==null || userid.equals("")) {
   			model.addAttribute("loggined","0");
-  		} else {
+  		} else { //로그인한 사용자
   			model.addAttribute("loggined","1");
   			model.addAttribute("userid",userid);
   		}
@@ -73,24 +74,28 @@ public class HomeController {
 	@RequestMapping("/logout")
 	   public String logout(HttpServletRequest hsr) {
 		  HttpSession session=hsr.getSession();
-		  session.invalidate();
+		  session.invalidate();//세션 삭제
 	      return "redirect:/list";
-	   }
+	     }
+	   
+	   
 	 @RequestMapping("/login")
 	   public String login() {
 	      return "login";
 	   }
 	 @RequestMapping("/newPerson")
-	   public String newPerson() {
+	   public String newPerson(HttpServletRequest hsr) {
+		  if(loginUser(hsr)) return "redirect:/list";
 	      return "newPerson";
 	   }
-	@RequestMapping(value = "/check_user", method = RequestMethod.POST,
+	 
+	 @RequestMapping(value = "/check_user", method = RequestMethod.POST,
 			produces = "application/text; charset=utf8")
 		public String check_user(HttpServletRequest hsr,Model model) {
 			String userid=hsr.getParameter("userid");
-			System.out.println("id ["+userid+"]");
+			//System.out.println("id ["+userid+"]");
 			String pw=hsr.getParameter("pw");
-			System.out.println("pw ["+pw+"]");
+			//System.out.println("pw ["+pw+"]");
 			//DB에서 유저확인: 기존유저면 리스트(새글쓰기 나오게) 없는 유저면 login창 그대로 
 			iMember member=sqlSession.getMapper(iMember.class);
 				int n = member.doCheckuser(userid,pw);
@@ -104,21 +109,45 @@ public class HomeController {
 	}
 	
   	@RequestMapping(value = "/view/{bbs_id}", method = RequestMethod.GET) 
-  	public String selectoneBBS(@PathVariable("bbs_id") int bbs_id, Model model) {
-  		System.out.println("bbs_id ["+bbs_id+"]"); 
+  	public String selectoneBBS(@PathVariable("bbs_id") int bbs_id, Model model,
+  			HttpServletRequest hsr) {
+  	
+  		//System.out.println("bbs_id ["+bbs_id+"]"); 
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		Listinfo post=bbs.getPost(bbs_id);//제이쿼리(list)로 받은 아이디로 호출...
   		model.addAttribute("post",post);
+  		
+  		//세션을 받아 게시글 작성자인지 대조해야됌
+  		HttpSession session=hsr.getSession();//세션을 받아서
+  		model.addAttribute("userid",session.getAttribute("loginid"));//모델로 비교 
+//  		String userid=(String) session.getAttribute("loginid");
+//  		System.out.println("userid ["+userid+"]");
+  		iReply r=sqlSession.getMapper(iReply.class);
+  		ArrayList<Replyinfo> replyList=r.getReplyList(bbs_id);
+  		model.addAttribute("reply_list",replyList);
+  		
   		return "view"; 
   	}
 
 	@RequestMapping(value = "/new", method = RequestMethod.GET)
-	public String brandnew() {
-		//
-		return "new";
+	public String writenew(HttpServletRequest hsr) {
+		//세션체크로 url주소로 바로 새글쓰기로 넘어가지 못하도록 설정
+//		HttpSession s=hsr.getSession();
+//		String userid=(String) s.getAttribute("userid");
+//		if(userid==null || userid.equals("")) {
+//			return "redirect:/list";
+//		}
+		if(loginUser(hsr)) return "new";
+		
+		return "redirect:/list";
 	}
+	
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
 	public String insertBBS(HttpServletRequest hsr) {
+		if(!loginUser(hsr)) return "redirect:/list";
+		
+		HttpSession s= hsr.getSession();
+		String userid=(String) s.getAttribute("userid");
 		String pTitle = hsr.getParameter("title");
 		String pContent = hsr.getParameter("content");
 		String pWriter = hsr.getParameter("writer");
@@ -131,13 +160,23 @@ public class HomeController {
 		
 		return "redirect:/list";
 	}
+	
 	@RequestMapping(value = "/update/view/{bbs_id}", method = RequestMethod.GET)
-	public String upviewBBS(@PathVariable("bbs_id") int bbs_id, Model model) {
+	public String upviewBBS(@PathVariable("bbs_id") int bbs_id, Model model,
+			HttpServletRequest hsr) {
+
+		HttpSession session=hsr.getSession();
+		model.addAttribute("userid",session.getAttribute("loginid"));
+		
+		if(loginUser(hsr)) return "redirect:/list";
+		
 		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		Listinfo post=bbs.getPost(bbs_id);//제이쿼리(list)로 받은 아이디로 호출...
   		model.addAttribute("update",post);
+  		//URL로 못넘어가도록 업데이트jsp에서 c:if로 막아줘야하나??
 		return "update";
 	}
+	
 	@RequestMapping(value = "/update", method = RequestMethod.POST,
 			produces = "application/text; charset=utf8")
 	public String updateBBS(HttpServletRequest hsr
@@ -164,8 +203,10 @@ public class HomeController {
 	
 	@RequestMapping(value = "/delete/{bbs_id}", method = RequestMethod.GET,
 			produces = "application/text; charset=utf8")
-	public String deleteBBS(@PathVariable("bbs_id") int bbs_id, Model model
-			) {
+	public String deleteBBS(@PathVariable("bbs_id") int bbs_id, Model model,
+			HttpServletRequest hsr) {
+		if(!loginUser(hsr)) return "redirect:/list";
+		
 		System.out.println("bbs_id**["+bbs_id+"]");//출력완료
 		model.addAttribute("bbsid",bbs_id);
 		//int bbsid=Integer.parseInt(hsr.getParameter("bbs_id"));
@@ -178,6 +219,8 @@ public class HomeController {
 	@RequestMapping(value="/signin",method=RequestMethod.POST,
 			produces = "application/text; charset=utf8")	
 	public String signin(HttpServletRequest hsr) {
+		if(loginUser(hsr)) return "redirect:/list";
+		
 		String realname=hsr.getParameter("realname");
 		String loginid=hsr.getParameter("loginid");
 		String password=hsr.getParameter("password");
@@ -186,4 +229,44 @@ public class HomeController {
 		member.doSignin(realname, loginid, password);
 		return "login";
 	}
-}	
+	
+	public boolean loginUser(HttpServletRequest hsr) {
+	   HttpSession s= hsr.getSession();
+	   String userid=(String) s.getAttribute("loginid");
+	   if(userid==null || userid.equals("")) return false;
+	   return true;
+   }
+	
+	@RequestMapping(value="/ReplyControl",method=RequestMethod.POST)
+	@ResponseBody
+	public String doReplyControl(HttpServletRequest hsr) {
+		String result="";
+		
+		try{
+		String optype=hsr.getParameter("optype");
+
+		String reply_content=hsr.getParameter("reply_content");
+		//왜 null이 올까아
+		System.out.println("replycontent ["+reply_content+"]");
+		
+		int bbs_id=Integer.parseInt(hsr.getParameter("bbs_id"));
+		HttpSession s= hsr.getSession();
+		String userid=(String) s.getAttribute("loginid");
+		
+		if(optype.equals("add")) { //댓글등록(추가)
+			//MyBatis 호출
+			iReply reply=sqlSession.getMapper(iReply.class);
+			reply.addReply(bbs_id,reply_content,userid);
+		} else if(optype.equals("delete")) { //댓글삭제
+		  } else if(optype.equals("update")) { //댓글수정
+		    }
+		result= "ok";
+		} catch (Exception e) {
+			result="fail";
+		  } finally {
+			return result;
+		    }
+	}
+		
+}
+	
