@@ -22,6 +22,8 @@ td:hover {
 }
 th{
 	border:1px solid black;
+	color: blue;
+	background color: yellow;
 }
 th:hover {
 	cursor: default; 
@@ -31,12 +33,16 @@ thead{
 }
 input[type=button] {
 	margin: auto;
-	display:block;
+	display: flex;
+	/* position: fixed;
+	left: 635px;*/
 }
 </style>
 <body>
 <div class='content'>
-
+<c:if test="${loggined eq '1'}">
+	* 로그인한 유저: ${userid} *&nbsp;&nbsp;&nbsp;<a href="/app/logout">로그아웃</a>
+	</c:if>
 <table id=tbllist>
 	
   	<thead>
@@ -49,11 +55,10 @@ input[type=button] {
     </c:forEach>
 </table>
 <c:if test="${loggined eq '1'}">
-	${userid}&nbsp;<a href="/app/logout">로그아웃</a>
-	<input type=button value='새글쓰기' id=btnNew>
+	<pre></pre><input type=button value='새글쓰기' id=btnNew>
 </c:if>
 <c:if test="${loggined eq '0'}">
-	<input type=button value='로그인 'id=btnLogin>  
+	<pre></pre><input type=button value='로그인 'id=btnLogin>  
 </c:if>
 <!--  onClick="location.href='new'" -->
 </div>

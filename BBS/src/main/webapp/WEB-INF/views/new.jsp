@@ -10,7 +10,7 @@
 <body>
 <form method=POST action="/app/save" id=frmNew>
 <table>
-<tr><td>제목</td><td><input type=text name=title></td><tr>
+<tr><td>제목</td><td><input type=text name=title id=title></td><tr>
 <tr><td valign=top>내용</td></tr><tr><td colspan=2><textarea name=content rows=20 cols=60></textarea></td></tr>
 
 <tr><td>작성자</td><td><input type=text name=writer value='${userid}' readonly></td></tr>
@@ -33,11 +33,11 @@ $(document)
 		title=$.trim(title);
 		if(title==''){
 			alert("제목을 입력하세요"); return false;
-		let content=$('#content').val();
-		content=$.trim(content);
-		if(content==''{
+			let content=$('#content').val();
+			content=$.trim(content);
+		}
+		if(content==''){
 			alert("내용을 입력하세요"); return false;
-		})
 		}
 	})
 </script>
