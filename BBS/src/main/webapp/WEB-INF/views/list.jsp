@@ -36,8 +36,9 @@ input[type=button] {
 </style>
 <body>
 <div class='content'>
-<table id=tbllist>
 
+<table id=tbllist>
+	
   	<thead>
   		<tr><th>게시물번호<th>제목</th><th>작성자</th><th>작성시각</th><th>수정시각</th></tr>
   	</thead>
@@ -47,7 +48,13 @@ input[type=button] {
     	</tr>
     </c:forEach>
 </table>
-<input type=button value='새글쓰기' id=btnNew>
+<c:if test="${loggined eq '1'}">
+	${userid}&nbsp;<a href="/app/logout">로그아웃</a>
+	<input type=button value='새글쓰기' id=btnNew>
+</c:if>
+<c:if test="${loggined eq '0'}">
+	<input type=button value='로그인 'id=btnLogin>  
+</c:if>
 <!--  onClick="location.href='new'" -->
 </div>
 </body>
@@ -64,5 +71,9 @@ $(document)
 		document.location='/app/new';
 		return false;
 	}) 
+	.on('click','#btnLogin',function(){
+		document.location='/app/login';
+		return false;
+	})
 </script>
 </html>
