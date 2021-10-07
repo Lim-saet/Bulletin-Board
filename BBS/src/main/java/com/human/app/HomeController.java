@@ -49,12 +49,14 @@ public class HomeController {
 	      return "home";
 	   }
 	
-	@RequestMapping(value = "/list", method = RequestMethod.GET,
+	@RequestMapping(value = {"/list","/list/{pageno}"}, method = RequestMethod.GET,
 			produces = "application/text; charset=utf8") 
-  	public String selectBBS(HttpServletRequest hsr,Model model) { 
+  	public String selectBBS(@PathVariable("pageno") int pageno,HttpServletRequest hsr,Model model) { 
 		//MyBatis 호출해서 가져오기 
   		iBBS bbs=sqlSession.getMapper(iBBS.class);
-  		ArrayList<Listinfo> alBBS=bbs.getList();
+  		int start=20*(pageno-1)+1;
+  		int end=20*pageno;
+  		ArrayList<Listinfo> alBBS=bbs.getList(start,end);
   		//System.out.println(alBBS.size());
   		
   		HttpSession session=hsr.getSession();
@@ -68,6 +70,14 @@ public class HomeController {
   			model.addAttribute("userid",userid);
   		}
   		model.addAttribute("listBBS",alBBS);
+  		String pDirection = "";
+  		if(pageno==1) {
+  			pDirection="<a href='/app/list/'"+(pageno+1)+"'>다음페이지</a>";
+  		} else {
+  			pDirection="<a href='/app/list/"+(pageno-1)+"'>이전페이지</a>"+
+  					"<a href='app/list"+(pageno+1)+"'>다음페이지</a>";
+  		}
+  		model.addAttribute("direct",pDirection);
   		return "list";
   	}
 	

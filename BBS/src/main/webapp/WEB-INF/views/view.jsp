@@ -23,7 +23,7 @@
 <tr><td>수정시각</td><td>${post.updated}</td></tr>
 </table>
 </td></tr>
-<c:if test="${userid} eq ${post.writer}">
+<c:if test="${userid eq post.writer}">
 <tr><td><input type=button id=btnUpdate value='수정'></td> 
 <!-- 해당 게시글 작성자만 수정,삭제 버튼이 나와야함->세션을 받아 세션이 같으면 버튼이 나오도록 다르면 안나오도록-->
 <td><input type=button id=btnDelete value='삭제'></td></tr>

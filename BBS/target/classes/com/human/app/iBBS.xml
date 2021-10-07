@@ -7,12 +7,14 @@
 		<insert id="writebbs">
 			insert into bbs(bbs_id,title,content,writer,created,updated)
 			values(seq_bbs_id.nextval,#{param1},#{param2},#{param3},
-			to_char(sysdate,'YYYYMMDDHH24MI'),to_char(sysdate,'YYYYMMDDHH24MI'))
+			to_char(sysdate,'YYYYMMDDHH24MI'),to_char(sysdate,'YYYYMMDDHH24MI'))l
 		</insert>
 	  <select id="getList" resultType="com.human.app.Listinfo">
-			select bbs_id, title, content, writer, created, updated
+			select rnum,bbs_id, title, content, writer, created, updated
+			from(select rownum as rnum,bbs_id, title, content, writer, created, updated
 			from bbs
-			order by created desc
+			order by created desc)
+			where rnum between #{param1} and #{param2};
 		</select> 
 		<update id="updatebbs">
 			update bbs set title=#{param2},content=#{param3}

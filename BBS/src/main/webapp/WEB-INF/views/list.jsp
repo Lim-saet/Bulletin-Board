@@ -22,8 +22,8 @@ td:hover {
 }
 th{
 	border:1px solid black;
-	color: blue;
-	background color: yellow;
+	color: white;
+	background-color: crimson;
 }
 th:hover {
 	cursor: default; 
@@ -53,10 +53,14 @@ input[type=button] {
     	<td>${list.created}</td><td>${list.updated}</td>
     	</tr>
     </c:forEach>
+    <tr>
+    	<td colspan=2 align=center>${direct}</td>
+    </tr>	
 </table>
 <c:if test="${loggined eq '1'}">
 	<pre></pre><input type=button value='새글쓰기' id=btnNew>
 </c:if>
+
 <c:if test="${loggined eq '0'}">
 	<pre></pre><input type=button value='로그인 'id=btnLogin>  
 </c:if>
