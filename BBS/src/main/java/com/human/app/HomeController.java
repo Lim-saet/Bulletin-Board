@@ -119,9 +119,20 @@ public class HomeController {
   		
   		//세션을 받아 게시글 작성자인지 대조해야됌
   		HttpSession session=hsr.getSession();//세션을 받아서
-  		model.addAttribute("userid",session.getAttribute("loginid"));//모델로 비교 
+  		String userid=(String) session.getAttribute("loginid");
+  		model.addAttribute("userid",userid);//모델로 비교 
 //  		String userid=(String) session.getAttribute("loginid");
 //  		System.out.println("userid ["+userid+"]");
+  		
+  		//로그인 여부 체크 
+  		if(userid==null || userid.equals("")) {
+  			model.addAttribute("loggined","0");
+  		} else { //로그인한 사용자
+  			model.addAttribute("loggined","1");
+  			//model.addAttribute("userid",userid);
+  		}
+  		
+  		//현재 게시물에 속한 댓글 리스트 가져오기
   		iReply r=sqlSession.getMapper(iReply.class);
   		ArrayList<Replyinfo> replyList=r.getReplyList(bbs_id);
   		model.addAttribute("reply_list",replyList);
@@ -130,16 +141,16 @@ public class HomeController {
   	}
 
 	@RequestMapping(value = "/new", method = RequestMethod.GET)
-	public String writenew(HttpServletRequest hsr) {
+	public String writenew(HttpServletRequest hsr, Model model) {
 		//세션체크로 url주소로 바로 새글쓰기로 넘어가지 못하도록 설정
-//		HttpSession s=hsr.getSession();
-//		String userid=(String) s.getAttribute("userid");
-//		if(userid==null || userid.equals("")) {
-//			return "redirect:/list";
-//		}
-		if(loginUser(hsr)) return "new";
-		
-		return "redirect:/list";
+		HttpSession s=hsr.getSession();
+		String userid=(String) s.getAttribute("loginid");
+		if(userid==null || userid.equals("")) {
+			return "redirect:/list";
+		}else {
+			model.addAttribute("userid",userid);//모델로 비교			
+		}
+		return "new"; 
 	}
 	
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
@@ -151,12 +162,12 @@ public class HomeController {
 		String pTitle = hsr.getParameter("title");
 		String pContent = hsr.getParameter("content");
 		String pWriter = hsr.getParameter("writer");
-		String pPasscode = hsr.getParameter("passcode");
-		System.out.println("title ["+pTitle+"] content ["+pContent+"] writer ["+pWriter+"] passcode ["+pPasscode+"]");
+		//String pPasscode = hsr.getParameter("passcode");
+		//System.out.println("title ["+pTitle+"] content ["+pContent+"] writer ["+pWriter+"] passcode ["+pPasscode+"]");
 		//출력완료-->insert into DB
 		iBBS bbs = sqlSession.getMapper(iBBS.class);
 		
-		bbs.writebbs(pTitle, pContent, pWriter, pPasscode);
+		bbs.writebbs(pTitle, pContent, pWriter /*pPasscode)*/);
 		
 		return "redirect:/list";
 	}
@@ -243,22 +254,33 @@ public class HomeController {
 		String result="";
 		
 		try{
+		iReply reply=sqlSession.getMapper(iReply.class); //try문 안에서 Mybatis호출
 		String optype=hsr.getParameter("optype");
 
-		String reply_content=hsr.getParameter("reply_content");
-		//왜 null이 올까아
-		System.out.println("replycontent ["+reply_content+"]");
-		
-		int bbs_id=Integer.parseInt(hsr.getParameter("bbs_id"));
-		HttpSession s= hsr.getSession();
-		String userid=(String) s.getAttribute("loginid");
+		//System.out.println("optype ["+optype+"]");
 		
 		if(optype.equals("add")) { //댓글등록(추가)
 			//MyBatis 호출
-			iReply reply=sqlSession.getMapper(iReply.class);
+			String reply_content=hsr.getParameter("reply_content");
+			//왜 null이 올까아
+			//System.out.println("replycontent ["+reply_content+"]");
+			int bbs_id=Integer.parseInt(hsr.getParameter("bbs_id"));
+			HttpSession s= hsr.getSession();
+			String userid=(String) s.getAttribute("loginid");
 			reply.addReply(bbs_id,reply_content,userid);
+			
 		} else if(optype.equals("delete")) { //댓글삭제
+			//System.out.println(hsr.getParameter("reply_id"));
+			int reply_id=Integer.parseInt(hsr.getParameter("reply_id"));
+			System.out.println("replyid["+reply_id+"]");
+
+			reply.delete(reply_id);
 		  } else if(optype.equals("update")) { //댓글수정
+			  String content=hsr.getParameter("reply_update");
+			  int reply_id=Integer.parseInt(hsr.getParameter("reply_id")); 
+			  System.out.println("reply_id ["+reply_id+"]");
+			   //왜 null인데
+			  reply.update(content,reply_id);
 		    }
 		result= "ok";
 		} catch (Exception e) {
