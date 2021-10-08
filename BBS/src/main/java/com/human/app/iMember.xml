@@ -12,4 +12,6 @@
 		<select id="doCheckuser" resultType="int">
 			select count(*) from member where loginid=#{param1} and passcode=#{param2}
 		</select>
+		
+	
 	</mapper>

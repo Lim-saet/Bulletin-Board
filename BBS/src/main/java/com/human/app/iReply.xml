@@ -13,4 +13,11 @@
 			select reply_id,bbs_id,content,writer,created,updated
 			from reply where bbs_id=#{param1} order by created desc
 		</select>
+		<delete id="delete">
+			delete from reply where reply_id=#{param1}
+		</delete>
+		<update id="update">
+			update reply set content=#{param1}, updated=to_char(sysdate,'YYYYMMDDHH24MI') 
+			where reply_id=#{param2}
+		</update>
 	</mapper>
