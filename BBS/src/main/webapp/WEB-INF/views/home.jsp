@@ -10,6 +10,6 @@
 	게시판  
 </h1>
 
-<P>  게시판 목록보기  </P>
+<img src="/resources/zzz.png">
 </body>
 </html>

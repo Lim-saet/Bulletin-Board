@@ -17,7 +17,12 @@
 <tr><td>
 <table align=center valign=top>
 <tr><td>제목</td><td>${post.title}</td></tr>
-<tr><td>내용</td><td>${post.content}</td></tr>
+<tr><td>내용</td>
+	<td>${post.content}
+<c:if test="${post.img_loc ne ''}">
+	<img src="/app/resources/${post.img_loc}">
+</c:if>	
+	</td></tr>
 <tr><td>작성자</td><td>${post.writer}</td></tr>
 <tr><td>작성시각</td><td>${post.created}</td></tr>
 <tr><td>수정시각</td><td>${post.updated}</td></tr>
@@ -72,7 +77,7 @@ $(document)
 		let bbs_id=$('#bbs_id').val();
 		console.log('bbs_id2 ['+bbs_id+']');
 		alert('수정하시겠습니까?');
-		document.location="/app/update/view/"+bbs_id;
+		document.location="/app/update_view/"+bbs_id;
 		return false;
 
 	  /*let bbs_id=$(this).find('td:eq(0)').text();

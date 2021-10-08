@@ -7,16 +7,19 @@ public class Listinfo {
 	private String writer;
 	private String created;
 	private String updated;
+	private String img_loc;
 	
 	public Listinfo() {}
 
-	public Listinfo(int bbs_id, String title, String content, String writer, String created, String updated) {
+	public Listinfo(int bbs_id, String title, String content, String writer, String created, String updated,
+			String img_loc) {
 		this.bbs_id = bbs_id;
 		this.title = title;
 		this.content = content;
 		this.writer = writer;
 		this.created = created;
 		this.updated = updated;
+		this.img_loc = img_loc;
 	}
 
 	public int getBbs_id() {
@@ -66,7 +69,14 @@ public class Listinfo {
 	public void setUpdated(String updated) {
 		this.updated = updated;
 	}
-	
+
+	public String getImg_loc() {
+		return img_loc;
+	}
+
+	public void setImg_loc(String img_loc) {
+		this.img_loc = img_loc;
+	}
 	
 	
 }

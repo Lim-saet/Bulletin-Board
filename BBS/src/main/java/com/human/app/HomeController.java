@@ -1,8 +1,10 @@
 package com.human.app;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Locale;
 
+import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -12,11 +14,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * Handles requests for the application home page.
@@ -49,7 +53,7 @@ public class HomeController {
 	      return "home";
 	   }
 	
-	@RequestMapping(value = {"/list","/list/{pageno}"}, method = RequestMethod.GET,
+	@RequestMapping(value = {"/list/{pageno}"}, method = RequestMethod.GET,
 			produces = "application/text; charset=utf8") 
   	public String selectBBS(@PathVariable("pageno") int pageno,HttpServletRequest hsr,Model model) { 
 		//MyBatis 호출해서 가져오기 
@@ -58,6 +62,14 @@ public class HomeController {
   		int end=20*pageno;
   		ArrayList<Listinfo> alBBS=bbs.getList(start,end);
   		//System.out.println(alBBS.size());
+  		String pDirection = "";
+  		if(pageno==1) {
+  			pDirection="<a href='/app/list/"+(pageno+1)+"'>다음페이지</a>";
+  		} else {
+  			pDirection="<a href='/app/list/"+(pageno-1)+"'>이전페이지</a>&nbsp;&nbsp;"+
+  					"<a href='/app/list/"+(pageno+1)+"'>다음페이지</a>";
+  		}
+  		model.addAttribute("direct",pDirection);///여기까지 페이징처리
   		
   		HttpSession session=hsr.getSession();
   		String userid=(String) session.getAttribute("loginid");
@@ -70,14 +82,7 @@ public class HomeController {
   			model.addAttribute("userid",userid);
   		}
   		model.addAttribute("listBBS",alBBS);
-  		String pDirection = "";
-  		if(pageno==1) {
-  			pDirection="<a href='/app/list/'"+(pageno+1)+"'>다음페이지</a>";
-  		} else {
-  			pDirection="<a href='/app/list/"+(pageno-1)+"'>이전페이지</a>"+
-  					"<a href='app/list"+(pageno+1)+"'>다음페이지</a>";
-  		}
-  		model.addAttribute("direct",pDirection);
+  	
   		return "list";
   	}
 	
@@ -85,7 +90,7 @@ public class HomeController {
 	   public String logout(HttpServletRequest hsr) {
 		  HttpSession session=hsr.getSession();
 		  session.invalidate();//세션 삭제
-	      return "redirect:/list";
+	      return "redirect:/list/1";
 	     }
 	   
 	   
@@ -112,7 +117,7 @@ public class HomeController {
 				if(n==1) {
 					HttpSession session=hsr.getSession();
 					session.setAttribute("loginid", userid);
-					return "redirect:/list";
+					return "redirect:/list/1";
 				} else {
 					return "redirect:/login";
 				}
@@ -156,40 +161,55 @@ public class HomeController {
 		HttpSession s=hsr.getSession();
 		String userid=(String) s.getAttribute("loginid");
 		if(userid==null || userid.equals("")) {
-			return "redirect:/list";
+			return "redirect:/list/1";
 		}else {
 			model.addAttribute("userid",userid);//모델로 비교			
 		}
 		return "new"; 
 	}
 	
+	@Resource(name="uploadPath")
+	String uploadPath;
 	@RequestMapping(value = "/save", method = RequestMethod.POST)
-	public String insertBBS(HttpServletRequest hsr) {
-		if(!loginUser(hsr)) return "redirect:/list";
+	public String insertBBS(HttpServletRequest hsr,MultipartFile ufile) {
+		if(!loginUser(hsr)) return "redirect:/list/1";
 		
+		String fileName= ufile.getOriginalFilename();
+		System.out.println("filename ["+fileName+"]");
+		File target = new File(uploadPath, fileName);
+		
+		if(!new File(uploadPath).exists()) {
+			new File(uploadPath).mkdir();
+		}
+		try {
+			FileCopyUtils.copy(ufile.getBytes(),target);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
 		HttpSession s= hsr.getSession();
 		String userid=(String) s.getAttribute("userid");
 		String pTitle = hsr.getParameter("title");
 		String pContent = hsr.getParameter("content");
 		String pWriter = hsr.getParameter("writer");
+
 		//String pPasscode = hsr.getParameter("passcode");
 		//System.out.println("title ["+pTitle+"] content ["+pContent+"] writer ["+pWriter+"] passcode ["+pPasscode+"]");
 		//출력완료-->insert into DB
 		iBBS bbs = sqlSession.getMapper(iBBS.class);
 		
-		bbs.writebbs(pTitle, pContent, pWriter /*pPasscode)*/);
+		bbs.writebbs(pTitle, pContent, pWriter,fileName);
 		
-		return "redirect:/list";
+		return "redirect:/list/1";
 	}
 	
-	@RequestMapping(value = "/update/view/{bbs_id}", method = RequestMethod.GET)
+	@RequestMapping(value = "/update_view/{bbs_id}", method = RequestMethod.GET)
 	public String upviewBBS(@PathVariable("bbs_id") int bbs_id, Model model,
 			HttpServletRequest hsr) {
 
 		HttpSession session=hsr.getSession();
 		model.addAttribute("userid",session.getAttribute("loginid"));
 		
-		if(loginUser(hsr)) return "redirect:/list";
+		if(!loginUser(hsr)) return "redirect:/list/1";
 		
 		iBBS bbs=sqlSession.getMapper(iBBS.class);
   		Listinfo post=bbs.getPost(bbs_id);//제이쿼리(list)로 받은 아이디로 호출...
@@ -218,7 +238,7 @@ public class HomeController {
 //		String content=hsr.getParameter("content");
 //		String title= hsr.getParameter("title");
 //		bbs.updatebbs(bbsid,content,title);
-		return "redirect:/list";
+		return "redirect:/list/1";
 	}
 	
 	
@@ -226,7 +246,7 @@ public class HomeController {
 			produces = "application/text; charset=utf8")
 	public String deleteBBS(@PathVariable("bbs_id") int bbs_id, Model model,
 			HttpServletRequest hsr) {
-		if(!loginUser(hsr)) return "redirect:/list";
+		if(!loginUser(hsr)) return "redirect:/list/1";
 		
 		System.out.println("bbs_id**["+bbs_id+"]");//출력완료
 		model.addAttribute("bbsid",bbs_id);
@@ -234,13 +254,13 @@ public class HomeController {
 		iBBS bbs=sqlSession.getMapper(iBBS.class);
 		bbs.deletebbs(bbs_id);
 		System.out.println("삭제완료");
-		return "redirect:/list";
+		return "redirect:/list/1";
 	}
 	
 	@RequestMapping(value="/signin",method=RequestMethod.POST,
 			produces = "application/text; charset=utf8")	
 	public String signin(HttpServletRequest hsr) {
-		if(loginUser(hsr)) return "redirect:/list";
+		if(loginUser(hsr)) return "redirect:/list/1";
 		
 		String realname=hsr.getParameter("realname");
 		String loginid=hsr.getParameter("loginid");

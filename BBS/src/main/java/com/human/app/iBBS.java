@@ -3,7 +3,7 @@ package com.human.app;
 import java.util.ArrayList;
 
 public interface iBBS {
-	void writebbs(String sTitle, String sContent, String sWriter /*String sPasscode*/);
+	void writebbs(String sTitle, String sContent, String sWriter, String fileName);
 	ArrayList<Listinfo> getList(int start,int end);
 	void updatebbs(int nBbsID, String sTitle, String sContent);
 	void deletebbs(int dBbsId);

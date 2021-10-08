@@ -53,10 +53,9 @@ input[type=button] {
     	<td>${list.created}</td><td>${list.updated}</td>
     	</tr>
     </c:forEach>
-    <tr>
-    	<td colspan=2 align=center>${direct}</td>
-    </tr>	
+
 </table>
+${direct}
 <c:if test="${loggined eq '1'}">
 	<pre></pre><input type=button value='새글쓰기' id=btnNew>
 </c:if>
@@ -84,5 +83,9 @@ $(document)
 		document.location='/app/login';
 		return false;
 	})
+	//.ready(function(){
+	//	let pageNo=1;
+	//	documnet.location='/app/list/'+pageNo;
+	//})
 </script>
 </html>
